@@ -94,29 +94,16 @@ require("lazy").setup({
     -- import/override with your plugins
     { import = "plugins" },
     { import = "plugins.wordpress" },
+    { import = "lazyvim.plugins.extras.lsp.none-ls" },
     {
-      "jose-elias-alvarez/null-ls.nvim", -- Correct repository for null-ls.nvim
-      dependencies = { "williamboman/mason.nvim" }, -- Keep mason.nvim as a dependency
+      "nvimtools/none-ls.nvim", -- Replaced null-ls.nvim with none-ls.nvim
+      dependencies = { "nvim-lua/plenary.nvim" },
       config = function()
-        local null_ls = require("null-ls")
-        null_ls.setup({
+        local none_ls = require("null-ls")
+        none_ls.setup({
           sources = {
-            null_ls.builtins.formatting.phpcbf,
-            null_ls.builtins.diagnostics.phpcs.with({
-              extra_args = { "--standard=WordPress" },
-            }),
-          },
-        })
-      end,
-    },
-    {
-      "jay-babu/mason-null-ls.nvim",
-      dependencies = { "jay-babu/null-ls.nvim", "williamboman/mason.nvim" },
-      config = function()
-        require("mason-null-ls").setup({
-          automatic_installation = {
-            ensure_installed = { "stylua", "shfmt" },
-            exclude = { "phpcs", "phpcbf" },
+            none_ls.builtins.formatting.stylua,
+            none_ls.builtins.formatting.shfmt,
           },
         })
       end,
