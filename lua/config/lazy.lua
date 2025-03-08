@@ -99,6 +99,7 @@ require("lazy").setup({
     { import = "plugins" },
     { import = "plugins.wordpress" },
     { import = "lazyvim.plugins.extras.lsp.none-ls" },
+    { import = "lazyvim.plugins.extras.formatting.prettier" },
     {
       "nvimtools/none-ls.nvim", -- Replaced null-ls.nvim with none-ls.nvim
       dependencies = { "nvim-lua/plenary.nvim" },
@@ -121,6 +122,69 @@ require("lazy").setup({
           size = 15, -- You can adjust the size of the terminal
         })
       end,
+    },
+    --laravel support--
+    {
+      "adalessa/laravel.nvim", -- Laravel plugin for Neovim
+      dependencies = {
+        "nvim-telescope/telescope.nvim", -- Required for Laravel commands
+        "MunifTanjim/nui.nvim", -- Required for Laravel UI components
+      },
+      cmd = { "Sail", "Artisan", "Composer", "Npm", "Yarn", "Git" },
+      keys = {
+        { "<leader>la", ":Laravel artisan<cr>", desc = "Laravel Artisan" },
+        { "<leader>lr", ":Laravel routes<cr>", desc = "Laravel Routes" },
+        { "<leader>lm", ":Laravel related<cr>", desc = "Laravel Related Files" },
+      },
+      config = function()
+        require("laravel").setup()
+      end,
+    },
+    -- Blade template support
+    {
+      "jwalton512/vim-blade", -- Syntax highlighting for Blade templates
+      ft = "blade", -- Filetype detection for Blade files
+    },
+
+    -- PHP support
+    {
+      "phpactor/phpactor", -- PHP language server
+      ft = "php", -- Filetype detection for PHP files
+      build = "composer install --no-dev --optimize-autoloader",
+      config = function()
+        require("lspconfig").phpactor.setup({})
+      end,
+    },
+
+    -- Debugging with PHP
+    {
+      "mfussenegger/nvim-dap", -- Debug Adapter Protocol (DAP) for Neovim
+      dependencies = {
+        "rcarriga/nvim-dap-ui", -- UI for DAP
+        "theHamsta/nvim-dap-virtual-text", -- Virtual text for debugging
+      },
+      config = function()
+        require("dap").adapters.php = {
+          type = "executable",
+          command = "node",
+          args = { os.getenv("HOME") .. "/vscode-php-debug/out/phpDebug.js" },
+        }
+        require("dap").configurations.php = {
+          {
+            type = "php",
+            request = "launch",
+            name = "Listen for Xdebug",
+            port = 9003,
+            log = true,
+          },
+        }
+      end,
+    },
+
+    -- Composer support
+    {
+      "noahfrederick/vim-composer", -- Composer integration for Vim
+      ft = "php", -- Filetype detection for PHP files
     },
   },
   defaults = {
