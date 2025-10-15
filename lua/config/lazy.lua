@@ -82,7 +82,7 @@ require("lazy").setup({
         "polylang",
         "sbi",
       },
-      diagnostics = { enable = true },
+      diagnostics = { enable = false },
       files = {
         maxsize = 10000000,
       },
@@ -96,10 +96,10 @@ require("lazy").setup({
     { import = "lazyvim.plugins.extras.lang.typescript" },
     { import = "lazyvim.plugins.extras.lang.json" },
     { import = "lazyvim.plugins.extras.ui.mini-animate" },
-    { import = "plugins" },
-    { import = "plugins.wordpress" },
     { import = "lazyvim.plugins.extras.lsp.none-ls" },
     { import = "lazyvim.plugins.extras.formatting.prettier" },
+    { import = "plugins" },
+    { import = "plugins.wordpress" },
     {
       "nvimtools/none-ls.nvim", -- Replaced null-ls.nvim with none-ls.nvim
       dependencies = { "nvim-lua/plenary.nvim" },
@@ -109,9 +109,30 @@ require("lazy").setup({
           sources = {
             none_ls.builtins.formatting.stylua,
             none_ls.builtins.formatting.shfmt,
+
+            none_ls.builtins.formatting.prismaFmt,
           },
         })
       end,
+    },
+    {
+      "neovim/nvim-lspconfig",
+      opts = {
+        -- keep existing servers and add prismals
+        servers = {
+          -- your other servers... (intelephense etc can remain configured elsewhere)
+          prismals = {}, -- enables prisma-language-server via mason
+        },
+      },
+    },
+    {
+      "nvim-treesitter/nvim-treesitter",
+      opts = {
+        ensure_installed = {
+          -- keep your existing list and add "prisma"
+          "lua", "typescript", "javascript", "json", "html", "css", "prisma",
+        },
+      },
     },
     {
       "akinsho/toggleterm.nvim",
@@ -148,15 +169,34 @@ require("lazy").setup({
 
     -- PHP support
     {
-      "phpactor/phpactor", -- PHP language server
-      ft = "php", -- Filetype detection for PHP files
+      "phpactor/phpactor",
+      ft = "php",
       build = "composer install --no-dev --optimize-autoloader",
       config = function()
-        require("lspconfig").phpactor.setup({})
+        require("lspconfig").phpactor.setup({
+          init_options = {
+            ["language_server.diagnostics_on_save"] = true,
+          },
+          settings = {
+            phpactor = {
+              diagnostics = {
+                enable = true, -- Keep diagnostics enabled, but disable virtual text
+              },
+            },
+          },
+          handlers = {
+            ["textDocument/publishDiagnostics"] = function(...)
+              local diagnostics = vim.lsp.with(vim.lsp.diagnostic.on_publish_diagnostics, {
+                virtual_text = false, -- Disable inline diagnostics
+                signs = true, -- Keep gutter signs
+                underline = true, -- Keep underline
+              })
+              return diagnostics (...)
+            end,
+          },
+        })
       end,
-    },
-
-    -- Debugging with PHP
+    }, -- Debugging with PHP
     {
       "mfussenegger/nvim-dap", -- Debug Adapter Protocol (DAP) for Neovim
       dependencies = {
