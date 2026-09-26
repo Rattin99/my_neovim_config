@@ -110,7 +110,7 @@ require("lazy").setup({
             none_ls.builtins.formatting.stylua,
             none_ls.builtins.formatting.shfmt,
 
-            none_ls.builtins.formatting.prismaFmt,
+            none_ls.builtins.formatting.prisma_format,
           },
         })
       end,
